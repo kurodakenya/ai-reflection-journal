@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI振り返りジャーナル — 要件定義・基本設計書</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Meiryo UI", "Hiragino Sans", sans-serif;
+    line-height: 1.8;
+    color: #333;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    background: #fafafa;
+  }
+  h1 {
+    font-size: 1.8rem;
+    color: #2F5496;
+    border-bottom: 3px solid #2F5496;
+    padding-bottom: 12px;
+    margin: 32px 0 16px;
+  }
+  h2 {
+    font-size: 1.4rem;
+    color: #2F5496;
+    border-bottom: 2px solid #D6E4F0;
+    padding-bottom: 8px;
+    margin: 28px 0 12px;
+  }
+  h3 {
+    font-size: 1.15rem;
+    color: #333;
+    margin: 20px 0 8px;
+  }
+  h4 {
+    font-size: 1.05rem;
+    color: #555;
+    margin: 16px 0 8px;
+  }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0 8px 24px; }
+  li { margin: 4px 0; }
+  blockquote {
+    border-left: 4px solid #2F5496;
+    padding: 8px 16px;
+    margin: 12px 0;
+    background: #EEF2F8;
+    color: #555;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+  th {
+    background: #2F5496;
+    color: #fff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: bold;
+  }
+  td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+  }
+  tr:nth-child(even) { background: #f5f5f5; }
+  tr:hover { background: #EEF2F8; }
+  code {
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: "Consolas", "Meiryo UI", monospace;
+    font-size: 0.9em;
+  }
+  pre {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+  }
+  hr {
+    border: none;
+    border-top: 2px solid #D6E4F0;
+    margin: 24px 0;
+  }
+  @media print {
+    body { max-width: 100%; padding: 20px; background: #fff; }
+    pre { white-space: pre-wrap; }
+    table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<h1 id="ai">AI振り返りジャーナル — 要件定義・基本設計書</h1>
+<blockquote>
+<p><strong>プロジェクト名:</strong> AI振り返りジャーナル (AI Reflection Journal)
+<strong>作成日:</strong> 2026-11-06
+<strong>ステータス:</strong> 要件定義完了 → 開発着手待ち</p>
+</blockquote>
+<hr />
+<h2 id="1">1. プロダクト概要</h2>
+<h3 id="11">1.1 コンセプト</h3>
+<p>日記を書くと AI が感情を分析し、感情の推移や傾向を可視化するジャーナルアプリ。
+「書く → 分析される → 自分の変化が見える」のサイクルでユーザーの自己理解と習慣化を支援する。</p>
+<h3 id="12">1.2 ターゲットユーザー</h3>
+<ul>
+<li>自己分析・内省に関心のある20〜40代</li>
+<li>日記習慣を作りたいが続かない人</li>
+<li>メンタルヘルスに関心があり、感情の変化を客観視したい人</li>
+</ul>
+<h3 id="13">1.3 ビジネスモデル</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Free</th>
+<th>Pro（¥500/月）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>日記作成</td>
+<td>10件/月</td>
+<td>無制限</td>
+</tr>
+<tr>
+<td>AI感情分析</td>
+<td>5件/月</td>
+<td>全件自動</td>
+</tr>
+<tr>
+<td>感情トレンド</td>
+<td>直近7日</td>
+<td>全期間</td>
+</tr>
+<tr>
+<td>AIフィードバック</td>
+<td>×</td>
+<td>○</td>
+</tr>
+<tr>
+<td>月間レポート</td>
+<td>×</td>
+<td>○</td>
+</tr>
+<tr>
+<td>データエクスポート</td>
+<td>×</td>
+<td>○</td>
+</tr>
+<tr>
+<td>テンプレート</td>
+<td>3種類</td>
+<td>全種類</td>
+</tr>
+</tbody>
+</table>
+<p><strong>収益目標:</strong> 60名の有料ユーザー = ¥30,000/月（初期マイルストーン）</p>
+<hr />
+<h2 id="2">2. 技術スタック</h2>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>技術</th>
+<th>選定理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>フロントエンド</td>
+<td>Next.js 14+ (App Router) / TypeScript</td>
+<td>SSR/SSG対応、App Routerでの最新設計</td>
+</tr>
+<tr>
+<td>スタイリング</td>
+<td>Tailwind CSS</td>
+<td>ユーティリティファースト、高速UI構築</td>
+</tr>
+<tr>
+<td>バックエンド/DB</td>
+<td>Supabase (PostgreSQL)</td>
+<td>Auth・DB・RLS・Realtimeを一括提供</td>
+</tr>
+<tr>
+<td>認証</td>
+<td>Supabase Auth</td>
+<td>OAuth (Google/GitHub) + メール認証</td>
+</tr>
+<tr>
+<td>AI</td>
+<td>Claude API (Anthropic)</td>
+<td>感情分析・月間レポート生成</td>
+</tr>
+<tr>
+<td>グラフ</td>
+<td>Recharts</td>
+<td>React対応、軽量、カスタマイズ性</td>
+</tr>
+<tr>
+<td>決済</td>
+<td>Stripe</td>
+<td>サブスクリプション管理、Webhook連携</td>
+</tr>
+<tr>
+<td>ホスティング</td>
+<td>Vercel</td>
+<td>Next.jsとの親和性、Edge Functions</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3">3. 機能一覧</h2>
+<h3 id="31">3.1 認証・アカウント</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>機能</th>
+<th>説明</th>
+<th>Free</th>
+<th>Pro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUTH-01</td>
+<td>ユーザー登録</td>
+<td>メール+パスワード / OAuth (Google, GitHub)</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>AUTH-02</td>
+<td>ログイン / ログアウト</td>
+<td>セッション管理（Supabase Auth）</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>AUTH-03</td>
+<td>パスワードリセット</td>
+<td>メールによるリセットリンク送信</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>AUTH-04</td>
+<td>プロフィール設定</td>
+<td>表示名・アバター・タイムゾーン</td>
+<td>○</td>
+<td>○</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32">3.2 ジャーナル（日記）</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>機能</th>
+<th>説明</th>
+<th>Free</th>
+<th>Pro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JOUR-01</td>
+<td>日記作成</td>
+<td>Markdown対応テキスト入力</td>
+<td>10件/月</td>
+<td>無制限</td>
+</tr>
+<tr>
+<td>JOUR-02</td>
+<td>日記編集</td>
+<td>既存エントリの編集</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>JOUR-03</td>
+<td>日記削除</td>
+<td>確認ダイアログ付き削除</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>JOUR-04</td>
+<td>カレンダービュー</td>
+<td>月間カレンダーで日記の有無を表示</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>JOUR-05</td>
+<td>テンプレート選択</td>
+<td>「今日の振り返り」「感謝日記」「目標進捗」等</td>
+<td>3種類</td>
+<td>全種類</td>
+</tr>
+<tr>
+<td>JOUR-06</td>
+<td>タグ機能</td>
+<td>カスタムタグの付与・フィルタリング</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>JOUR-07</td>
+<td>日記詳細表示</td>
+<td>Markdown→HTMLレンダリング + AI分析結果</td>
+<td>○</td>
+<td>○</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-ai">3.3 AI分析</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>機能</th>
+<th>説明</th>
+<th>Free</th>
+<th>Pro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI-01</td>
+<td>感情分析</td>
+<td>5感情 (喜・怒・哀・驚・安心) + エネルギーレベル (1-5)</td>
+<td>5件/月</td>
+<td>全件自動</td>
+</tr>
+<tr>
+<td>AI-02</td>
+<td>AIフィードバック</td>
+<td>1エントリごとの短いコメント生成</td>
+<td>×</td>
+<td>○</td>
+</tr>
+<tr>
+<td>AI-03</td>
+<td>月間レポート</td>
+<td>「今月のあなた」AI生成サマリー（月初自動生成）</td>
+<td>×</td>
+<td>○</td>
+</tr>
+<tr>
+<td>AI-04</td>
+<td>感情トレンドグラフ</td>
+<td>週次・月次の感情推移チャート (Recharts)</td>
+<td>直近7日</td>
+<td>全期間</td>
+</tr>
+</tbody>
+</table>
+<h3 id="34">3.4 モチベーション</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>機能</th>
+<th>説明</th>
+<th>Free</th>
+<th>Pro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MOT-01</td>
+<td>ストリーク</td>
+<td>連続記録日数 + 最長記録の表示</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>MOT-02</td>
+<td>リマインダー通知</td>
+<td>毎日の記入リマインド（時間指定可）</td>
+<td>○</td>
+<td>○</td>
+</tr>
+</tbody>
+</table>
+<h3 id="35">3.5 データ管理</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>機能</th>
+<th>説明</th>
+<th>Free</th>
+<th>Pro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DATA-01</td>
+<td>データエクスポート</td>
+<td>JSON / CSV形式でのダウンロード</td>
+<td>×</td>
+<td>○</td>
+</tr>
+<tr>
+<td>DATA-02</td>
+<td>アカウント削除</td>
+<td>全データの完全削除（確認ダイアログ付き）</td>
+<td>○</td>
+<td>○</td>
+</tr>
+</tbody>
+</table>
+<h3 id="36">3.6 課金</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>機能</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PAY-01</td>
+<td>Stripe Checkout</td>
+<td>サブスクリプション購入フロー</td>
+</tr>
+<tr>
+<td>PAY-02</td>
+<td>Webhook連携</td>
+<td>支払い状態の同期 (active/canceled/past_due)</td>
+</tr>
+<tr>
+<td>PAY-03</td>
+<td>請求ポータル</td>
+<td>Stripeカスタマーポータルへのリダイレクト</td>
+</tr>
+<tr>
+<td>PAY-04</td>
+<td>Free制限管理</td>
+<td>月間利用カウントの追跡とリセット</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-dbsupabase-postgresql">4. DB設計（Supabase / PostgreSQL）</h2>
+<h3 id="41">4.1 テーブル一覧</h3>
+<table>
+<thead>
+<tr>
+<th>テーブル名</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>profiles</td>
+<td>ユーザープロフィール（auth.usersと1:1）</td>
+</tr>
+<tr>
+<td>journal_entries</td>
+<td>日記エントリ</td>
+</tr>
+<tr>
+<td>emotion_analyses</td>
+<td>AI感情分析結果</td>
+</tr>
+<tr>
+<td>streaks</td>
+<td>連続記録トラッキング</td>
+</tr>
+<tr>
+<td>subscriptions</td>
+<td>Stripeサブスクリプション情報</td>
+</tr>
+<tr>
+<td>monthly_reports</td>
+<td>月間AIレポート</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42">4.2 テーブル定義</h3>
+<h4 id="profiles">profiles</h4>
+<pre><code class="language-sql">CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  display_name TEXT,
+  avatar_url TEXT,
+  timezone TEXT DEFAULT 'Asia/Tokyo',
+  free_entries_used INT DEFAULT 0,
+  free_analyses_used INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+</code></pre>
+<p><strong>備考:</strong>
+- <code>auth.users</code> の作成時にトリガーで自動生成
+- <code>free_entries_used</code> / <code>free_analyses_used</code> は月初にcronジョブでリセット</p>
+<h4 id="journal_entries">journal_entries</h4>
+<pre><code class="language-sql">CREATE TABLE journal_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  tags TEXT[] DEFAULT '{}',
+  template_type TEXT DEFAULT 'free',
+  entry_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_entries_user_id ON journal_entries(user_id);
+CREATE INDEX idx_entries_entry_date ON journal_entries(user_id, entry_date);
+CREATE INDEX idx_entries_tags ON journal_entries USING GIN(tags);
+</code></pre>
+<p><strong>備考:</strong>
+- <code>entry_date</code> と <code>created_at</code> は分離（深夜に「今日の分」を書くケース対応）
+- <code>tags</code> は PostgreSQL の <code>text[]</code> 型、GINインデックスで高速検索
+- <code>template_type</code>: <code>'free'</code>, <code>'gratitude'</code>, <code>'goal'</code>, <code>'reflection'</code>, <code>'custom'</code></p>
+<h4 id="emotion_analyses">emotion_analyses</h4>
+<pre><code class="language-sql">CREATE TABLE emotion_analyses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  entry_id UUID NOT NULL UNIQUE REFERENCES journal_entries(id) ON DELETE CASCADE,
+  joy REAL DEFAULT 0 CHECK (joy &gt;= 0 AND joy &lt;= 1),
+  anger REAL DEFAULT 0 CHECK (anger &gt;= 0 AND anger &lt;= 1),
+  sadness REAL DEFAULT 0 CHECK (sadness &gt;= 0 AND sadness &lt;= 1),
+  surprise REAL DEFAULT 0 CHECK (surprise &gt;= 0 AND surprise &lt;= 1),
+  calm REAL DEFAULT 0 CHECK (calm &gt;= 0 AND calm &lt;= 1),
+  energy_level INT DEFAULT 3 CHECK (energy_level &gt;= 1 AND energy_level &lt;= 5),
+  ai_feedback TEXT,
+  raw_response JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_analyses_entry_id ON emotion_analyses(entry_id);
+</code></pre>
+<p><strong>備考:</strong>
+- 各感情スコアは 0.0〜1.0 の float（合計は1.0に正規化しない。複数感情が同時に高いケースを許容）
+- <code>energy_level</code> は 1（低）〜5（高）の5段階
+- <code>raw_response</code> に Claude API のレスポンス全体を JSONB で保存（デバッグ・改善用）
+- 1エントリにつき1分析（<code>entry_id</code> に UNIQUE制約）</p>
+<h4 id="streaks">streaks</h4>
+<pre><code class="language-sql">CREATE TABLE streaks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES profiles(id) ON DELETE CASCADE,
+  current_streak INT DEFAULT 0,
+  longest_streak INT DEFAULT 0,
+  last_entry_date DATE,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+</code></pre>
+<p><strong>備考:</strong>
+- ユーザーごとに1レコード（UNIQUE制約）
+- 日記投稿時に <code>last_entry_date</code> との差分で <code>current_streak</code> を更新
+  - 差分 = 1日 → <code>current_streak += 1</code>
+  - 差分 = 0日（同日2回目）→ 変更なし
+  - 差分 &gt; 1日 → <code>current_streak = 1</code>（リセット）
+- <code>longest_streak = MAX(current_streak, longest_streak)</code></p>
+<h4 id="subscriptions">subscriptions</h4>
+<pre><code class="language-sql">CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES profiles(id) ON DELETE CASCADE,
+  stripe_customer_id TEXT UNIQUE,
+  stripe_subscription_id TEXT UNIQUE,
+  status TEXT DEFAULT 'free' CHECK (status IN ('free', 'active', 'canceled', 'past_due', 'incomplete')),
+  plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'pro')),
+  current_period_start TIMESTAMPTZ,
+  current_period_end TIMESTAMPTZ,
+  cancel_at_period_end BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+</code></pre>
+<p><strong>備考:</strong>
+- Stripe Webhook で <code>status</code> を同期
+- <code>cancel_at_period_end = true</code> の場合、期間終了まではPro機能を維持
+- <code>plan</code> はアプリ内での権限判定に使用</p>
+<h4 id="monthly_reports">monthly_reports</h4>
+<pre><code class="language-sql">CREATE TABLE monthly_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  year_month TEXT NOT NULL,
+  emotion_summary JSONB,
+  ai_narrative TEXT,
+  total_entries INT DEFAULT 0,
+  avg_energy REAL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, year_month)
+);
+
+CREATE INDEX idx_reports_user_month ON monthly_reports(user_id, year_month);
+</code></pre>
+<p><strong>備考:</strong>
+- <code>year_month</code> は <code>'2026-11'</code> 形式
+- <code>emotion_summary</code> 例:
+  <code>json
+  {
+    "avg_joy": 0.65,
+    "avg_anger": 0.12,
+    "avg_sadness": 0.20,
+    "avg_surprise": 0.30,
+    "avg_calm": 0.55,
+    "dominant_emotion": "joy",
+    "trend": "improving"
+  }</code>
+- 月初にcronで前月分を自動生成（Proユーザーのみ）</p>
+<h3 id="43-rlsrow-level-security">4.3 RLS（Row Level Security）ポリシー</h3>
+<p>全テーブルに対して以下のポリシーを適用:</p>
+<pre><code class="language-sql">-- 全テーブル共通パターン
+ALTER TABLE &lt;table_name&gt; ENABLE ROW LEVEL SECURITY;
+
+-- SELECT: 自分のデータのみ閲覧可能
+CREATE POLICY &quot;Users can view own data&quot;
+  ON &lt;table_name&gt; FOR SELECT
+  USING (user_id = auth.uid());
+
+-- INSERT: 自分のデータのみ作成可能
+CREATE POLICY &quot;Users can insert own data&quot;
+  ON &lt;table_name&gt; FOR INSERT
+  WITH CHECK (user_id = auth.uid());
+
+-- UPDATE: 自分のデータのみ更新可能
+CREATE POLICY &quot;Users can update own data&quot;
+  ON &lt;table_name&gt; FOR UPDATE
+  USING (user_id = auth.uid());
+
+-- DELETE: 自分のデータのみ削除可能
+CREATE POLICY &quot;Users can delete own data&quot;
+  ON &lt;table_name&gt; FOR DELETE
+  USING (user_id = auth.uid());
+</code></pre>
+<p><strong>profiles テーブルは <code>id = auth.uid()</code> で判定</strong>（<code>user_id</code> ではなく <code>id</code>）。</p>
+<h3 id="44-database-functions-triggers">4.4 Database Functions / Triggers</h3>
+<pre><code class="language-sql">-- 1. 新規ユーザー登録時にprofilesを自動作成
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO profiles (id, display_name)
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data-&gt;&gt;'name', NEW.email));
+
+  INSERT INTO streaks (user_id)
+  VALUES (NEW.id);
+
+  INSERT INTO subscriptions (user_id)
+  VALUES (NEW.id);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- 2. updated_atの自動更新
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON journal_entries
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON subscriptions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+</code></pre>
+<hr />
+<h2 id="5">5. 画面構成</h2>
+<h3 id="51">5.1 画面一覧</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>画面名</th>
+<th>ルート</th>
+<th>認証</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ランディングページ</td>
+<td><code>/</code></td>
+<td>不要</td>
+<td>未ログインユーザー向けLP</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ログイン/サインアップ</td>
+<td><code>/auth</code></td>
+<td>不要</td>
+<td>認証画面</td>
+</tr>
+<tr>
+<td>3</td>
+<td>ダッシュボード</td>
+<td><code>/dashboard</code></td>
+<td>必要</td>
+<td>ホーム画面</td>
+</tr>
+<tr>
+<td>4</td>
+<td>日記作成</td>
+<td><code>/entries/new</code></td>
+<td>必要</td>
+<td>新規日記入力</td>
+</tr>
+<tr>
+<td>5</td>
+<td>日記編集</td>
+<td><code>/entries/[id]/edit</code></td>
+<td>必要</td>
+<td>既存日記の編集</td>
+</tr>
+<tr>
+<td>6</td>
+<td>日記詳細</td>
+<td><code>/entries/[id]</code></td>
+<td>必要</td>
+<td>日記閲覧 + AI分析結果</td>
+</tr>
+<tr>
+<td>7</td>
+<td>カレンダー</td>
+<td><code>/calendar</code></td>
+<td>必要</td>
+<td>月間カレンダービュー</td>
+</tr>
+<tr>
+<td>8</td>
+<td>感情アナリティクス</td>
+<td><code>/analytics</code></td>
+<td>必要</td>
+<td>感情トレンドグラフ</td>
+</tr>
+<tr>
+<td>9</td>
+<td>月間レポート</td>
+<td><code>/reports/[year-month]</code></td>
+<td>必要</td>
+<td>AIサマリー（Pro）</td>
+</tr>
+<tr>
+<td>10</td>
+<td>設定</td>
+<td><code>/settings</code></td>
+<td>必要</td>
+<td>アカウント・通知・課金管理</td>
+</tr>
+<tr>
+<td>11</td>
+<td>料金プラン</td>
+<td><code>/pricing</code></td>
+<td>不要</td>
+<td>Free/Pro比較 + アップグレード</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52">5.2 画面詳細</h3>
+<h4 id="521">5.2.1 ランディングページ (<code>/</code>)</h4>
+<ul>
+<li><strong>SSG（静的生成）</strong> で配信</li>
+<li>ヒーローセクション: キャッチコピー + 「無料で始める」CTA</li>
+<li>機能紹介: 3カラムレイアウトで主要機能をアイコン付き紹介</li>
+<li>料金プラン: Free/Pro比較テーブル</li>
+<li>フッター: 利用規約・プライバシーポリシー</li>
+<li>OGP画像設定（SNSシェア対策）</li>
+</ul>
+<h4 id="522-auth">5.2.2 ログイン / サインアップ (<code>/auth</code>)</h4>
+<ul>
+<li>メール + パスワード入力フォーム</li>
+<li>OAuth ボタン（Google / GitHub）</li>
+<li>「アカウント作成」⇄「ログイン」切り替え</li>
+<li>パスワードリセット（メール送信フロー）</li>
+<li>認証後 → <code>/dashboard</code> にリダイレクト</li>
+</ul>
+<h4 id="523-dashboard">5.2.3 ダッシュボード (<code>/dashboard</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>コンポーネント</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>今日のカード</td>
+<td>未記入時: 「今日の振り返りを書く」ボタン / 記入済み: サマリー表示</td>
+</tr>
+<tr>
+<td>ストリーク表示</td>
+<td>🔥 連続N日 + 最長記録</td>
+</tr>
+<tr>
+<td>感情ミニチャート</td>
+<td>直近7日の感情推移（折れ線グラフ / Recharts）</td>
+</tr>
+<tr>
+<td>月間カレンダー</td>
+<td>日記のある日をドットでハイライト</td>
+</tr>
+<tr>
+<td>Free残数バー</td>
+<td>「今月あとN件書けます」（Freeユーザーのみ表示）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="524-entriesnew-entriesidedit">5.2.4 日記作成・編集 (<code>/entries/new</code>, <code>/entries/[id]/edit</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>コンポーネント</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>テンプレート選択</td>
+<td>「今日の振り返り」「感謝日記」「目標進捗」等のプリセット</td>
+</tr>
+<tr>
+<td>テキストエディタ</td>
+<td>Markdown対応のリッチテキストエリア</td>
+</tr>
+<tr>
+<td>タグ入力</td>
+<td>チップ形式でのタグ追加・削除</td>
+</tr>
+<tr>
+<td>日付選択</td>
+<td>デフォルトは今日、カレンダーから変更可能</td>
+</tr>
+<tr>
+<td>保存ボタン</td>
+<td>保存時にAI感情分析をトリガー（Proは自動、Freeは残回数判定）</td>
+</tr>
+<tr>
+<td>AI分析結果</td>
+<td>保存後にモーダルまたはインラインで感情スコア + フィードバック表示</td>
+</tr>
+</tbody>
+</table>
+<h4 id="525-entriesid">5.2.5 日記詳細 (<code>/entries/[id]</code>)</h4>
+<ul>
+<li>日記本文（Markdown → HTMLレンダリング）</li>
+<li>感情スコア表示（レーダーチャート / Recharts）</li>
+<li>AIフィードバック表示（Pro）</li>
+<li>アクションバー: 編集 / 削除</li>
+</ul>
+<h4 id="526-calendar">5.2.6 カレンダービュー (<code>/calendar</code>)</h4>
+<ul>
+<li>月間カレンダー（日記ありの日を感情カラーのドットで表示）</li>
+<li>感情カラーマッピング: 喜=緑、怒=赤、哀=青、驚=黄、安心=紫</li>
+<li>日付クリック → 日記詳細へ遷移</li>
+<li>月切り替えナビゲーション</li>
+</ul>
+<h4 id="527-analytics">5.2.7 感情アナリティクス (<code>/analytics</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>コンポーネント</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>期間切り替え</td>
+<td>7日 / 30日 / 90日 / 全期間（Free: 7日のみ）</td>
+</tr>
+<tr>
+<td>感情推移グラフ</td>
+<td>折れ線チャート。5感情を色分け</td>
+</tr>
+<tr>
+<td>エネルギーレベル推移</td>
+<td>バーチャート</td>
+</tr>
+<tr>
+<td>感情分布</td>
+<td>円グラフまたはレーダーチャート</td>
+</tr>
+<tr>
+<td>Pro誘導</td>
+<td>7日超選択時にFreeユーザーへアップグレード案内</td>
+</tr>
+</tbody>
+</table>
+<h4 id="528-reportsyear-month-pro">5.2.8 月間レポート (<code>/reports/[year-month]</code>) — Pro専用</h4>
+<ul>
+<li>「今月のあなた」AI生成サマリー文</li>
+<li>感情ハイライト（最多感情 + 変化傾向）</li>
+<li>記録統計（総記入日数 / 平均エネルギー / ストリーク）</li>
+<li>過去レポート一覧（月別アーカイブ）</li>
+</ul>
+<h4 id="529-settings">5.2.9 設定 (<code>/settings</code>)</h4>
+<ul>
+<li>プロフィール編集（表示名・アバター・タイムゾーン）</li>
+<li>通知設定（リマインダー時間の設定）</li>
+<li>プラン管理（現在のプラン + Stripe請求ポータルリンク）</li>
+<li>データエクスポート（JSON / CSV）— Pro</li>
+<li>アカウント削除（確認ダイアログ付き）</li>
+</ul>
+<h4 id="5210-pricing">5.2.10 料金プラン (<code>/pricing</code>)</h4>
+<ul>
+<li>Free / Pro 並列比較カード</li>
+<li>「Proにアップグレード」→ Stripe Checkout</li>
+<li>FAQ（解約方法、データ移行等）</li>
+</ul>
+<h3 id="53">5.3 共通レイアウト</h3>
+<pre><code>┌─────────────────────────────────────────┐
+│  ヘッダー（ロゴ / ナビ / ユーザーメニュー）  │
+├─────────────────────────────────────────┤
+│                                         │
+│           メインコンテンツ                 │
+│                                         │
+├─────────────────────────────────────────┤
+│  モバイルナビ（ボトムタブ）                  │
+└─────────────────────────────────────────┘
+</code></pre>
+<p><strong>ナビゲーション項目:</strong>
+- ホーム（ダッシュボード）
+- 書く（日記作成）
+- カレンダー
+- 分析
+- 設定</p>
+<hr />
+<h2 id="6-ai">6. AI感情分析の設計</h2>
+<h3 id="61-claude-api">6.1 Claude API プロンプト設計</h3>
+<pre><code>あなたは感情分析の専門家です。
+以下の日記テキストを分析し、JSON形式で結果を返してください。
+
+## 分析項目
+- joy (喜び): 0.0〜1.0
+- anger (怒り): 0.0〜1.0
+- sadness (哀しみ): 0.0〜1.0
+- surprise (驚き): 0.0〜1.0
+- calm (安心): 0.0〜1.0
+- energy_level (エネルギーレベル): 1〜5の整数
+- feedback (フィードバック): 50〜100文字の共感的なコメント
+
+## ルール
+- 各感情スコアは独立して評価（合計が1.0になる必要はない）
+- 複数の感情が同時に高いケースも許容
+- フィードバックは共感的・肯定的なトーンで
+- JSON以外の出力は不要
+
+## 日記テキスト
+{content}
+</code></pre>
+<h3 id="62">6.2 レスポンス形式</h3>
+<pre><code class="language-json">{
+  &quot;joy&quot;: 0.72,
+  &quot;anger&quot;: 0.05,
+  &quot;sadness&quot;: 0.15,
+  &quot;surprise&quot;: 0.30,
+  &quot;calm&quot;: 0.60,
+  &quot;energy_level&quot;: 4,
+  &quot;feedback&quot;: &quot;新しい挑戦に前向きに取り組んでいる姿勢が印象的です。少し疲れも感じているようですが、充実した一日だったのが伝わってきます。&quot;
+}
+</code></pre>
+<h3 id="63">6.3 月間レポート生成プロンプト</h3>
+<pre><code>あなたはパーソナルコーチです。
+以下はユーザーの1ヶ月分の日記と感情分析データです。
+「今月のあなた」として、300〜500文字のナラティブレポートを生成してください。
+
+## 含めるべき内容
+- 全体的な感情の傾向と変化
+- 特に印象的だった出来事やテーマ
+- ポジティブな変化や成長のポイント
+- 来月に向けた前向きなメッセージ
+
+## データ
+{monthly_data}
+</code></pre>
+<h3 id="64-api">6.4 API呼び出しフロー</h3>
+<pre><code>[日記保存] → [Free制限チェック] → [Claude API呼び出し]
+                                       ↓
+                              [レスポンスパース]
+                                       ↓
+                              [emotion_analyses に保存]
+                                       ↓
+                              [ストリーク更新]
+                                       ↓
+                              [UI に結果表示]
+</code></pre>
+<hr />
+<h2 id="7-stripe">7. Stripe 課金フロー</h2>
+<h3 id="71">7.1 アップグレードフロー</h3>
+<pre><code>[Pro購入ボタン] → [API: Stripe Checkout Session作成]
+                          ↓
+                  [Stripe Checkout画面]
+                          ↓
+                  [支払い完了 → success_url にリダイレクト]
+                          ↓
+                  [Webhook: checkout.session.completed]
+                          ↓
+                  [subscriptions テーブル更新 (status: 'active')]
+</code></pre>
+<h3 id="72-webhook">7.2 Webhook イベント処理</h3>
+<table>
+<thead>
+<tr>
+<th>イベント</th>
+<th>処理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>checkout.session.completed</code></td>
+<td>subscriptions を <code>active</code> に更新</td>
+</tr>
+<tr>
+<td><code>invoice.payment_succeeded</code></td>
+<td><code>current_period_end</code> を更新</td>
+</tr>
+<tr>
+<td><code>invoice.payment_failed</code></td>
+<td>status を <code>past_due</code> に更新</td>
+</tr>
+<tr>
+<td><code>customer.subscription.deleted</code></td>
+<td>status を <code>canceled</code>、plan を <code>free</code> に更新</td>
+</tr>
+<tr>
+<td><code>customer.subscription.updated</code></td>
+<td><code>cancel_at_period_end</code> を同期</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-free">7.3 Free制限ロジック</h3>
+<pre><code class="language-typescript">// 日記作成時の制限チェック
+async function canCreateEntry(userId: string): Promise&lt;boolean&gt; {
+  const sub = await getSubscription(userId);
+  if (sub.plan === 'pro') return true;
+
+  const profile = await getProfile(userId);
+  return profile.free_entries_used &lt; 10;
+}
+
+// AI分析の制限チェック
+async function canAnalyze(userId: string): Promise&lt;boolean&gt; {
+  const sub = await getSubscription(userId);
+  if (sub.plan === 'pro') return true;
+
+  const profile = await getProfile(userId);
+  return profile.free_analyses_used &lt; 5;
+}
+
+// 月初リセット（Supabase Edge Function / cron）
+// 毎月1日 00:00 JST に実行
+async function resetMonthlyLimits() {
+  await supabase
+    .from('profiles')
+    .update({ free_entries_used: 0, free_analyses_used: 0 })
+    .neq('id', null); // 全ユーザー
+}
+</code></pre>
+<hr />
+<h2 id="8">8. ディレクトリ構成（想定）</h2>
+<pre><code>ai-journal/
+├── public/
+│   ├── og-image.png
+│   └── favicon.ico
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx              # ルートレイアウト
+│   │   ├── page.tsx                # LP (/)
+│   │   ├── auth/
+│   │   │   └── page.tsx            # 認証
+│   │   ├── dashboard/
+│   │   │   └── page.tsx            # ダッシュボード
+│   │   ├── entries/
+│   │   │   ├── new/
+│   │   │   │   └── page.tsx        # 日記作成
+│   │   │   └── [id]/
+│   │   │       ├── page.tsx        # 日記詳細
+│   │   │       └── edit/
+│   │   │           └── page.tsx    # 日記編集
+│   │   ├── calendar/
+│   │   │   └── page.tsx            # カレンダー
+│   │   ├── analytics/
+│   │   │   └── page.tsx            # 感情アナリティクス
+│   │   ├── reports/
+│   │   │   └── [yearMonth]/
+│   │   │       └── page.tsx        # 月間レポート
+│   │   ├── settings/
+│   │   │   └── page.tsx            # 設定
+│   │   ├── pricing/
+│   │   │   └── page.tsx            # 料金プラン
+│   │   └── api/
+│   │       ├── analyze/
+│   │       │   └── route.ts        # AI感情分析 API
+│   │       ├── reports/
+│   │       │   └── generate/
+│   │       │       └── route.ts    # 月間レポート生成 API
+│   │       └── stripe/
+│   │           ├── checkout/
+│   │           │   └── route.ts    # Checkout Session作成
+│   │           └── webhook/
+│   │               └── route.ts    # Stripe Webhook
+│   ├── components/
+│   │   ├── ui/                     # 共通UIコンポーネント
+│   │   ├── layout/                 # Header, Nav, Footer
+│   │   ├── journal/                # 日記関連コンポーネント
+│   │   ├── charts/                 # Rechartsラッパー
+│   │   └── auth/                   # 認証関連コンポーネント
+│   ├── lib/
+│   │   ├── supabase/
+│   │   │   ├── client.ts           # ブラウザ用クライアント
+│   │   │   ├── server.ts           # サーバー用クライアント
+│   │   │   └── middleware.ts       # 認証ミドルウェア
+│   │   ├── stripe.ts               # Stripe設定
+│   │   ├── claude.ts               # Claude API呼び出し
+│   │   └── utils.ts                # ユーティリティ
+│   ├── hooks/                      # カスタムフック
+│   ├── types/                      # TypeScript型定義
+│   └── middleware.ts               # Next.js ミドルウェア（認証ガード）
+├── supabase/
+│   ├── migrations/                 # DBマイグレーション
+│   ├── functions/                  # Edge Functions（cronなど）
+│   └── seed.sql                    # テストデータ
+├── .env.local                      # 環境変数
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
+└── README.md
+</code></pre>
+<hr />
+<h2 id="9">9. 環境変数</h2>
+<pre><code class="language-env"># Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
+
+# Claude API
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Stripe
+STRIPE_SECRET_KEY=sk_live_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_ID=price_...
+
+# App
+NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
+</code></pre>
+<hr />
+<h2 id="10">10. 開発フェーズ（推奨順序）</h2>
+<h3 id="phase-1">Phase 1: 基盤構築</h3>
+<ol>
+<li>Next.js + TypeScript + Tailwind CSS プロジェクト初期化</li>
+<li>Supabase プロジェクト作成 + DB マイグレーション実行</li>
+<li>認証機能（メール + OAuth）</li>
+<li>共通レイアウト + ナビゲーション</li>
+</ol>
+<h3 id="phase-2">Phase 2: コア機能</h3>
+<ol>
+<li>日記 CRUD（作成・閲覧・編集・削除）</li>
+<li>カレンダービュー</li>
+<li>ストリーク機能</li>
+<li>ダッシュボード</li>
+</ol>
+<h3 id="phase-3-ai">Phase 3: AI統合</h3>
+<ol>
+<li>Claude API 感情分析の実装</li>
+<li>分析結果の保存・表示</li>
+<li>感情アナリティクス画面（Recharts）</li>
+</ol>
+<h3 id="phase-4">Phase 4: 収益化</h3>
+<ol>
+<li>Stripe 統合（Checkout + Webhook）</li>
+<li>Free/Pro 制限ロジック</li>
+<li>料金プランページ</li>
+</ol>
+<h3 id="phase-5">Phase 5: 高度な機能</h3>
+<ol>
+<li>月間レポート生成</li>
+<li>リマインダー通知</li>
+<li>データエクスポート</li>
+</ol>
+<h3 id="phase-6">Phase 6: 公開準備</h3>
+<ol>
+<li>ランディングページ</li>
+<li>SEO + OGP設定</li>
+<li>README.md 作成</li>
+<li>Vercel デプロイ + カスタムドメイン</li>
+</ol>
+<hr />
+<h2 id="11_1">11. ポートフォリオとしての評価ポイント</h2>
+<table>
+<thead>
+<tr>
+<th>評価軸</th>
+<th>本プロダクトでの実現</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>クリーンなコード</td>
+<td>TypeScript 厳格モード、ESLint + Prettier</td>
+</tr>
+<tr>
+<td>テスト</td>
+<td>Jest + React Testing Library（主要フローのテスト）</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions（lint + test + 自動デプロイ）</td>
+</tr>
+<tr>
+<td>README</td>
+<td>スクショ付き、セットアップ手順、アーキテクチャ図</td>
+</tr>
+<tr>
+<td>AI API統合</td>
+<td>Claude API を活用した感情分析・レポート生成</td>
+</tr>
+<tr>
+<td>OAuth</td>
+<td>Google / GitHub ソーシャルログイン</td>
+</tr>
+<tr>
+<td>外部API連携</td>
+<td>Stripe 決済統合</td>
+</tr>
+<tr>
+<td>クラウドデプロイ</td>
+<td>Vercel + Supabase（本番環境）</td>
+</tr>
+<tr>
+<td>セキュリティ</td>
+<td>RLS、環境変数管理、Webhook署名検証</td>
+</tr>
+</tbody>
+</table>
+<footer style="margin-top: 40px; padding-top: 16px; border-top: 1px solid #ddd; color: #999; font-size: 0.8rem;">
+  AI振り返りジャーナル — 要件定義・基本設計書 | 作成日: 2026-11-06
+</footer>
+</body>
+</html>
