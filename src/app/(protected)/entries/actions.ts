@@ -3,6 +3,47 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
+async function updateStreak(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, entryDate: string) {
+  const { data: streak } = await supabase
+    .from('streaks')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (!streak) return;
+
+  const today = new Date(entryDate);
+  const lastDate = streak.last_entry_date ? new Date(streak.last_entry_date) : null;
+
+  let newStreak = streak.current_streak;
+
+  if (!lastDate) {
+    newStreak = 1;
+  } else {
+    const diffMs = today.getTime() - lastDate.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      newStreak = streak.current_streak + 1;
+    } else if (diffDays === 0) {
+      return;
+    } else {
+      newStreak = 1;
+    }
+  }
+
+  const newLongest = Math.max(newStreak, streak.longest_streak);
+
+  await supabase
+    .from('streaks')
+    .update({
+      current_streak: newStreak,
+      longest_streak: newLongest,
+      last_entry_date: entryDate,
+    })
+    .eq('user_id', userId);
+}
+
 export async function createEntry(formData: FormData): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -24,17 +65,21 @@ export async function createEntry(formData: FormData): Promise<{ error?: string 
     ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean)
     : [];
 
+  const resolvedDate = entryDate || new Date().toISOString().split('T')[0];
+
   const { data, error } = await supabase.from('journal_entries').insert({
     user_id: user.id,
     content: content.trim(),
     tags,
     template_type: templateType,
-    entry_date: entryDate || new Date().toISOString().split('T')[0],
+    entry_date: resolvedDate,
   }).select('id').single();
 
   if (error) {
     return { error: error.message };
   }
+
+  await updateStreak(supabase, user.id, resolvedDate);
 
   redirect(`/entries/${data.id}`);
 }
