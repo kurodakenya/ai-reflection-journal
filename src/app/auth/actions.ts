@@ -52,6 +52,25 @@ export async function signup(formData: FormData): Promise<{ error?: string; succ
   return { success: '確認メールを送信しました。メールのリンクをクリックして登録を完了してください。' };
 }
 
+export async function signInWithOAuth(provider: 'google' | 'github') {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+}
+
 export async function signout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
