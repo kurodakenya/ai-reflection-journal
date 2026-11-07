@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { DeleteButton } from './DeleteButton';
+import { EmotionRadarChart } from '@/components/emotion/EmotionRadarChart';
+import { AnalyzeButton } from '@/components/emotion/AnalyzeButton';
 
 const TEMPLATE_LABELS: Record<string, string> = {
   free: '自由記述',
@@ -27,6 +29,12 @@ export default async function EntryDetailPage({
   if (!entry) {
     notFound();
   }
+
+  const { data: emotionAnalysis } = await supabase
+    .from('emotion_analyses')
+    .select('*')
+    .eq('entry_id', id)
+    .maybeSingle();
 
   return (
     <>
@@ -84,6 +92,50 @@ export default async function EntryDetailPage({
           )}
         </div>
       </article>
+
+      <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          AI感情分析
+        </h2>
+        {emotionAnalysis ? (
+          <div>
+            <EmotionRadarChart
+              scores={{
+                joy: emotionAnalysis.joy,
+                sadness: emotionAnalysis.sadness,
+                anger: emotionAnalysis.anger,
+                fear: emotionAnalysis.fear,
+                surprise: emotionAnalysis.surprise,
+                trust: emotionAnalysis.trust,
+                anticipation: emotionAnalysis.anticipation,
+                disgust: emotionAnalysis.disgust,
+              }}
+            />
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  主要感情:
+                </span>
+                <span className="rounded-full bg-purple-100 px-3 py-0.5 text-sm font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                  {emotionAnalysis.overall_sentiment}
+                </span>
+              </div>
+              {emotionAnalysis.ai_feedback && (
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {emotionAnalysis.ai_feedback}
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center">
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+              この日記の感情をAIが分析します
+            </p>
+            <AnalyzeButton entryId={id} />
+          </div>
+        )}
+      </div>
     </>
   );
 }
