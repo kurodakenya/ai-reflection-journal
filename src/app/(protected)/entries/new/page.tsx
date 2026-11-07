@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createEntry } from '../actions';
 
 const TEMPLATES = [
@@ -13,11 +13,12 @@ const TEMPLATES = [
 
 export default function NewEntryPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [template, setTemplate] = useState('free');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
-  const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [entryDate, setEntryDate] = useState(searchParams.get('date') ?? new Date().toISOString().split('T')[0]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
