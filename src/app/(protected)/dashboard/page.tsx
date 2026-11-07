@@ -1,12 +1,26 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { StreakCard } from '@/components/streak/StreakCard';
+import { MiniCalendar } from '@/components/dashboard/MiniCalendar';
+
+const TEMPLATE_LABELS: Record<string, string> = {
+  free: '自由記述',
+  reflection: '振り返り',
+  gratitude: '感謝',
+  learning: '学び',
+};
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const today = new Date().toISOString().split('T')[0];
+  const monthStart = `${today.slice(0, 7)}-01`;
+  const monthNum = Number(today.slice(5, 7));
+  const yearNum = Number(today.slice(0, 4));
+  const nextMonth = monthNum === 12
+    ? `${yearNum + 1}-01-01`
+    : `${yearNum}-${String(monthNum + 1).padStart(2, '0')}-01`;
 
   const { data: todayEntry } = await supabase
     .from('journal_entries')
@@ -16,14 +30,20 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
-  const { count: monthlyCount } = await supabase
+  const { data: monthEntries } = await supabase
     .from('journal_entries')
-    .select('*', { count: 'exact', head: true })
-    .gte('entry_date', `${today.slice(0, 7)}-01`)
-    .lt('entry_date', today.slice(0, 7) === '12'
-      ? `${Number(today.slice(0, 4)) + 1}-01-01`
-      : `${today.slice(0, 4)}-${String(Number(today.slice(5, 7)) + 1).padStart(2, '0')}-01`
-    );
+    .select('entry_date')
+    .gte('entry_date', monthStart)
+    .lt('entry_date', nextMonth);
+
+  const monthlyCount = monthEntries?.length ?? 0;
+  const entryDates = monthEntries?.map(e => e.entry_date) ?? [];
+
+  const { data: recentEntries } = await supabase
+    .from('journal_entries')
+    .select('id, content, entry_date, template_type')
+    .order('entry_date', { ascending: false })
+    .limit(5);
 
   return (
     <>
@@ -65,24 +85,67 @@ export default async function DashboardPage() {
 
         <StreakCard />
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 sm:col-span-2">
-          <div className="flex items-center justify-between">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              今月の記録
+              {monthNum}月のカレンダー
             </h3>
             <Link
               href="/calendar"
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+              className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
             >
-              カレンダーを見る &rarr;
+              詳細 &rarr;
             </Link>
           </div>
-          <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-            {monthlyCount ?? 0}
-            <span className="ml-1 text-base font-normal text-gray-500 dark:text-gray-400">
-              件
-            </span>
+          <MiniCalendar entryDates={entryDates} />
+          <p className="mt-3 text-center text-xs text-gray-400 dark:text-gray-500">
+            {monthlyCount}件の日記
           </p>
+        </div>
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <h3 className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+            感情の推移
+          </h3>
+          <div className="flex h-24 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800/50">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              Phase 3 で実装予定
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 sm:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              最近の日記
+            </h3>
+          </div>
+          {recentEntries && recentEntries.length > 0 ? (
+            <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+              {recentEntries.map(entry => (
+                <li key={entry.id}>
+                  <Link
+                    href={`/entries/${entry.id}`}
+                    className="flex items-center gap-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50 -mx-2 px-2 rounded-lg"
+                  >
+                    <time className="shrink-0 text-xs text-gray-400 dark:text-gray-500 w-20">
+                      {entry.entry_date}
+                    </time>
+                    <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                      {TEMPLATE_LABELS[entry.template_type] ?? entry.template_type}
+                    </span>
+                    <p className="min-w-0 flex-1 truncate text-sm text-gray-700 dark:text-gray-300">
+                      {entry.content}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="py-4 text-center text-sm text-gray-400 dark:text-gray-500">
+              まだ日記がありません
+            </p>
+          )}
         </div>
       </div>
     </>
