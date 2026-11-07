@@ -71,6 +71,46 @@ export async function signInWithOAuth(provider: 'google' | 'github') {
   }
 }
 
+export async function resetPassword(formData: FormData): Promise<{ error?: string; success?: string }> {
+  const supabase = await createClient();
+  const email = formData.get('email') as string;
+
+  if (!email) {
+    return { error: 'メールアドレスを入力してください' };
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/auth/reset-password`,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: 'パスワードリセットメールを送信しました。メールのリンクをクリックしてください。' };
+}
+
+export async function updatePassword(formData: FormData): Promise<{ error?: string; success?: string }> {
+  const supabase = await createClient();
+  const password = formData.get('password') as string;
+
+  if (!password) {
+    return { error: '新しいパスワードを入力してください' };
+  }
+
+  if (password.length < 6) {
+    return { error: 'パスワードは6文字以上で入力してください' };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  redirect('/dashboard');
+}
+
 export async function signout() {
   const supabase = await createClient();
   await supabase.auth.signOut();

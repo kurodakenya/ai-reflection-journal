@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { login, signup, signInWithOAuth } from './actions';
+import { login, signup, signInWithOAuth, resetPassword } from './actions';
 
 export default function AuthPage() {
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [mode, setMode] = useState<'login' | 'signup' | 'reset'>('login');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export default function AuthPage() {
     setSuccess(null);
     setLoading(true);
 
-    const action = mode === 'login' ? login : signup;
+    const action = mode === 'reset' ? resetPassword : mode === 'login' ? login : signup;
     const result = await action(formData);
 
     setLoading(false);
@@ -51,38 +51,46 @@ export default function AuthPage() {
         </div>
 
         <div className="rounded-2xl bg-white p-8 shadow-lg dark:bg-gray-800">
-          <div className="mb-6 flex rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-            <button
-              type="button"
-              onClick={() => {
-                setMode('login');
-                setError(null);
-                setSuccess(null);
-              }}
-              className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
-                mode === 'login'
-                  ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-600 dark:text-white'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
-              }`}
-            >
-              ログイン
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode('signup');
-                setError(null);
-                setSuccess(null);
-              }}
-              className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
-                mode === 'signup'
-                  ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-600 dark:text-white'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
-              }`}
-            >
-              新規登録
-            </button>
-          </div>
+          {mode !== 'reset' && (
+            <div className="mb-6 flex rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setError(null);
+                  setSuccess(null);
+                }}
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
+                  mode === 'login'
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-600 dark:text-white'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                }`}
+              >
+                ログイン
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('signup');
+                  setError(null);
+                  setSuccess(null);
+                }}
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-colors ${
+                  mode === 'signup'
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-600 dark:text-white'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                }`}
+              >
+                新規登録
+              </button>
+            </div>
+          )}
+
+          {mode === 'reset' && (
+            <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+              パスワードリセット
+            </h2>
+          )}
 
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
@@ -96,7 +104,7 @@ export default function AuthPage() {
             </div>
           )}
 
-          <div className="space-y-3">
+          {mode !== 'reset' && (<div className="space-y-3">
             <button
               type="button"
               onClick={() => handleOAuth('google')}
@@ -134,9 +142,9 @@ export default function AuthPage() {
               </svg>
               {oauthLoading === 'github' ? '接続中...' : 'GitHubでログイン'}
             </button>
-          </div>
+          </div>)}
 
-          <div className="relative my-6">
+          {mode !== 'reset' && (<div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300 dark:border-gray-600" />
             </div>
@@ -145,74 +153,122 @@ export default function AuthPage() {
                 または
               </span>
             </div>
-          </div>
+          </div>)}
 
-          <form action={handleSubmit} className="space-y-4">
-            {mode === 'signup' && (
+          {mode === 'reset' ? (
+            <form action={handleSubmit} className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                登録済みのメールアドレスを入力してください。パスワードリセット用のリンクを送信します。
+              </p>
               <div>
                 <label
-                  htmlFor="displayName"
+                  htmlFor="email"
                   className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  表示名
+                  メールアドレス
                 </label>
                 <input
-                  id="displayName"
-                  name="displayName"
-                  type="text"
-                  placeholder="ニックネーム"
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="email@example.com"
                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
                 />
               </div>
-            )}
-
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                メールアドレス
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="email@example.com"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                {loading ? '送信中...' : 'リセットメールを送信'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
+                className="w-full text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
               >
-                パスワード
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={6}
-                placeholder="6文字以上"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
-              />
-            </div>
+                ログインに戻る
+              </button>
+            </form>
+          ) : (
+            <form action={handleSubmit} className="space-y-4">
+              {mode === 'signup' && (
+                <div>
+                  <label
+                    htmlFor="displayName"
+                    className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    表示名
+                  </label>
+                  <input
+                    id="displayName"
+                    name="displayName"
+                    type="text"
+                    placeholder="ニックネーム"
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+                  />
+                </div>
+              )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading
-                ? '処理中...'
-                : mode === 'login'
-                  ? 'ログイン'
-                  : '新規登録'}
-            </button>
-          </form>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  メールアドレス
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="email@example.com"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  パスワード
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  placeholder="6文字以上"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading
+                  ? '処理中...'
+                  : mode === 'login'
+                    ? 'ログイン'
+                    : '新規登録'}
+              </button>
+
+              {mode === 'login' && (
+                <button
+                  type="button"
+                  onClick={() => { setMode('reset'); setError(null); setSuccess(null); }}
+                  className="w-full text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >
+                  パスワードを忘れた方
+                </button>
+              )}
+            </form>
+          )}
         </div>
       </div>
     </div>
