@@ -3,21 +3,21 @@
 -- ============================================
 
 -- 1. 新規ユーザー登録時に profiles / streaks / subscriptions を自動作成
-CREATE OR REPLACE FUNCTION handle_new_user()
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO profiles (id, display_name)
+  INSERT INTO public.profiles (id, display_name)
   VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', NEW.email));
 
-  INSERT INTO streaks (user_id)
+  INSERT INTO public.streaks (user_id)
   VALUES (NEW.id);
 
-  INSERT INTO subscriptions (user_id)
+  INSERT INTO public.subscriptions (user_id)
   VALUES (NEW.id);
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
