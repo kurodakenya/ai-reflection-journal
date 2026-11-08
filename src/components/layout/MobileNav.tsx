@@ -7,7 +7,7 @@ const navItems = [
   { href: '/dashboard', label: 'ホーム', icon: '📊' },
   { href: '/entries/new', label: '記録', icon: '✏️' },
   { href: '/calendar', label: 'カレンダー', icon: '📅' },
-  { href: '/analytics', label: '分析', icon: '📈' },
+  { href: '/reports', label: 'レポート', icon: '📋' },
   { href: '/settings', label: '設定', icon: '⚙️' },
 ];
 

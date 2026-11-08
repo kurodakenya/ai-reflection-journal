@@ -1,9 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
+import { getUserPlan } from '@/lib/subscription';
 import { SettingsForm } from './SettingsForm';
+import { ReminderSettings } from '@/components/settings/ReminderSettings';
+import { ExportData } from '@/components/settings/ExportData';
+import { DeleteAccount } from '@/components/settings/DeleteAccount';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  const plan = await getUserPlan();
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -27,6 +33,13 @@ export default async function SettingsPage() {
             displayName={profile?.display_name ?? ''}
             timezone={profile?.timezone ?? 'Asia/Tokyo'}
           />
+        </div>
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            リマインダー通知
+          </h2>
+          <ReminderSettings />
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
@@ -55,13 +68,24 @@ export default async function SettingsPage() {
                 プラン
               </dt>
               <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                Free
-                <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">
-                  (Phase 4 で Pro プラン実装予定)
-                </span>
+                {plan === 'pro' ? 'Pro' : 'Free'}
               </dd>
             </div>
           </dl>
+        </div>
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            データエクスポート
+          </h2>
+          <ExportData isPro={plan === 'pro'} />
+        </div>
+
+        <div className="rounded-2xl border border-red-200 bg-white p-6 dark:border-red-900/50 dark:bg-gray-900">
+          <h2 className="mb-4 text-lg font-semibold text-red-600 dark:text-red-400">
+            アカウント削除
+          </h2>
+          <DeleteAccount />
         </div>
       </div>
     </>
