@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { decryptIfEnabled } from '@/lib/encryption';
 import { StreakCard } from '@/components/streak/StreakCard';
 import { MiniCalendar } from '@/components/dashboard/MiniCalendar';
 import {
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+    if (te) te.content = decryptIfEnabled(te.content) ?? te.content;
     todayEntry = te;
 
     const { data: monthEntries } = await supabase
@@ -68,7 +70,7 @@ export default async function DashboardPage() {
       .select('id, content, entry_date, template_type')
       .order('entry_date', { ascending: false })
       .limit(5);
-    recentEntries = re;
+    recentEntries = re?.map(e => ({ ...e, content: decryptIfEnabled(e.content) ?? e.content })) ?? null;
   }
 
   return (

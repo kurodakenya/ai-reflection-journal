@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { encryptIfEnabled } from '@/lib/encryption';
 
 export async function updateProfile(formData: FormData): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient();
@@ -24,7 +25,7 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
   const { error } = await supabase
     .from('profiles')
     .update({
-      display_name: displayName.trim(),
+      display_name: encryptIfEnabled(displayName.trim()),
       timezone: timezone || 'Asia/Tokyo',
     })
     .eq('id', user.id);

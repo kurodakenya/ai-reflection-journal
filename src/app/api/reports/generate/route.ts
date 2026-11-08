@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { generateMonthlyReport } from '@/lib/claude';
 import { getUserPlan } from '@/lib/subscription';
+import { decryptIfEnabled, encryptIfEnabled } from '@/lib/encryption';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
     const result = await generateMonthlyReport(
       entries.map((e) => ({
         date: e.entry_date,
-        content: e.content,
+        content: decryptIfEnabled(e.content) ?? '',
         emotion: emotionMap.get(e.id),
       })),
       yearMonth,
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         year_month: yearMonth,
-        ai_narrative: result.narrative,
+        ai_narrative: encryptIfEnabled(result.narrative),
         emotion_summary: {
           highlights: result.highlights,
           ...result.emotion_summary,

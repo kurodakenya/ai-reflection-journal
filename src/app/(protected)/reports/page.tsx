@@ -1,6 +1,7 @@
 import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserPlan } from '@/lib/subscription';
+import { decryptIfEnabled } from '@/lib/encryption';
 import Link from 'next/link';
 import { GenerateReportButton } from './GenerateReportButton';
 import { DEMO_MODE, getDemoReport } from '@/lib/demo';
@@ -61,7 +62,10 @@ export default async function ReportsPage() {
       .select('*')
       .eq('user_id', user!.id)
       .order('year_month', { ascending: false });
-    reports = r as Report[] | null;
+    reports = (r as Report[] | null)?.map(rep => ({
+      ...rep,
+      ai_narrative: decryptIfEnabled(rep.ai_narrative) ?? rep.ai_narrative,
+    })) ?? null;
 
     hasCurrentReport = reports?.some(
       (r: Report) => r.year_month === prevYearMonth,

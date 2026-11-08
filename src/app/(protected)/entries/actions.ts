@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { encryptIfEnabled } from '@/lib/encryption';
 
 async function updateStreak(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, entryDate: string) {
   const { data: streak } = await supabase
@@ -69,7 +70,7 @@ export async function createEntry(formData: FormData): Promise<{ error?: string 
 
   const { data, error } = await supabase.from('journal_entries').insert({
     user_id: user.id,
-    content: content.trim(),
+    content: encryptIfEnabled(content.trim()) ?? '',
     tags,
     template_type: templateType,
     entry_date: resolvedDate,
@@ -108,7 +109,7 @@ export async function updateEntry(id: string, formData: FormData): Promise<{ err
   const { error } = await supabase
     .from('journal_entries')
     .update({
-      content: content.trim(),
+      content: encryptIfEnabled(content.trim()) ?? '',
       tags,
       template_type: templateType,
       entry_date: entryDate || new Date().toISOString().split('T')[0],

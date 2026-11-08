@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { analyzeEmotion } from '@/lib/claude';
+import { decryptIfEnabled, encryptIfEnabled } from '@/lib/encryption';
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await analyzeEmotion(entry.content);
+    const result = await analyzeEmotion(decryptIfEnabled(entry.content) ?? '');
 
     const { data: analysis, error } = await supabase
       .from('emotion_analyses')
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
         anticipation: result.scores.anticipation,
         disgust: result.scores.disgust,
         overall_sentiment: result.dominant_emotion,
-        ai_feedback: result.summary,
+        ai_feedback: encryptIfEnabled(result.summary),
       })
       .select()
       .single();

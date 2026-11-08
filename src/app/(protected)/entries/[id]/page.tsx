@@ -1,4 +1,5 @@
 import { connection } from 'next/server';
+import { decryptIfEnabled } from '@/lib/encryption';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { DeleteButton } from './DeleteButton';
@@ -37,6 +38,7 @@ export default async function EntryDetailPage({
       .select('*')
       .eq('id', id)
       .single();
+    if (e) e.content = decryptIfEnabled(e.content) ?? e.content;
     entry = e;
 
     const { data: ea } = await supabase
@@ -44,6 +46,7 @@ export default async function EntryDetailPage({
       .select('*')
       .eq('entry_id', id)
       .maybeSingle();
+    if (ea) ea.ai_feedback = decryptIfEnabled(ea.ai_feedback) ?? ea.ai_feedback;
     emotionAnalysis = ea;
   }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserPlan } from '@/lib/subscription';
+import { decryptIfEnabled } from '@/lib/encryption';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
     return {
       entry_date: entry.entry_date,
       template_type: entry.template_type,
-      content: entry.content,
+      content: decryptIfEnabled(entry.content) ?? entry.content,
       tags: entry.tags,
       created_at: entry.created_at,
       updated_at: entry.updated_at,
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
             anticipation: analysis.anticipation,
             disgust: analysis.disgust,
             overall_sentiment: analysis.overall_sentiment,
-            ai_feedback: analysis.ai_feedback,
+            ai_feedback: decryptIfEnabled(analysis.ai_feedback) ?? analysis.ai_feedback,
           }
         : null,
     };

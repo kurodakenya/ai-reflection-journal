@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { decryptIfEnabled } from '@/lib/encryption';
 import { EditForm } from './EditForm';
 
 export default async function EditEntryPage({
@@ -23,7 +24,7 @@ export default async function EditEntryPage({
   return (
     <EditForm
       id={entry.id}
-      initialContent={entry.content}
+      initialContent={decryptIfEnabled(entry.content) ?? entry.content}
       initialTags={entry.tags ?? []}
       initialTemplate={entry.template_type ?? 'free'}
       initialDate={entry.entry_date}

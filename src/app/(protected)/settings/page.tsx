@@ -1,6 +1,7 @@
 import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserPlan } from '@/lib/subscription';
+import { decryptIfEnabled } from '@/lib/encryption';
 import { SettingsForm } from './SettingsForm';
 import { ReminderSettings } from '@/components/settings/ReminderSettings';
 import { ExportData } from '@/components/settings/ExportData';
@@ -30,6 +31,7 @@ export default async function SettingsPage() {
       .select('display_name, avatar_url, timezone')
       .eq('id', u!.id)
       .single();
+    if (p) p.display_name = decryptIfEnabled(p.display_name) ?? p.display_name;
     profile = p;
   }
 
