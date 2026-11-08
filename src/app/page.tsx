@@ -302,7 +302,7 @@ export default function LandingPage() {
             </a>
           </div>
           <p className="text-xs text-gray-400 dark:text-gray-600">
-            &copy; {new Date().getFullYear()} AI振り返りジャーナル
+            &copy; 2026 AI振り返りジャーナル
           </p>
         </div>
       </footer>

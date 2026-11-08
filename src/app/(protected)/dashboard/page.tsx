@@ -1,7 +1,16 @@
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { StreakCard } from '@/components/streak/StreakCard';
 import { MiniCalendar } from '@/components/dashboard/MiniCalendar';
+import {
+  DEMO_MODE,
+  getDemoTodayEntry,
+  getDemoMonthEntries,
+  getDemoRecentEntries,
+} from '@/lib/demo';
+
+export const instant = false;
 
 const TEMPLATE_LABELS: Record<string, string> = {
   free: '自由記述',
@@ -11,39 +20,56 @@ const TEMPLATE_LABELS: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
+  await connection();
   const today = new Date().toISOString().split('T')[0];
-  const monthStart = `${today.slice(0, 7)}-01`;
   const monthNum = Number(today.slice(5, 7));
-  const yearNum = Number(today.slice(0, 4));
-  const nextMonth = monthNum === 12
-    ? `${yearNum + 1}-01-01`
-    : `${yearNum}-${String(monthNum + 1).padStart(2, '0')}-01`;
 
-  const { data: todayEntry } = await supabase
-    .from('journal_entries')
-    .select('id, content, template_type')
-    .eq('entry_date', today)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  let todayEntry: { id: string; content: string; template_type: string } | null;
+  let monthlyCount: number;
+  let entryDates: string[];
+  let recentEntries: { id: string; content: string; entry_date: string; template_type: string }[] | null;
 
-  const { data: monthEntries } = await supabase
-    .from('journal_entries')
-    .select('entry_date')
-    .gte('entry_date', monthStart)
-    .lt('entry_date', nextMonth);
+  if (DEMO_MODE) {
+    const te = getDemoTodayEntry();
+    todayEntry = te ? { id: te.id, content: te.content, template_type: te.template_type } : null;
+    const me = getDemoMonthEntries();
+    monthlyCount = me.length;
+    entryDates = me.map((e) => e.entry_date);
+    recentEntries = getDemoRecentEntries(5);
+  } else {
+    const supabase = await createClient();
 
-  const monthlyCount = monthEntries?.length ?? 0;
-  const entryDates = monthEntries?.map(e => e.entry_date) ?? [];
+    const monthStart = `${today.slice(0, 7)}-01`;
+    const yearNum = Number(today.slice(0, 4));
+    const nextMonth = monthNum === 12
+      ? `${yearNum + 1}-01-01`
+      : `${yearNum}-${String(monthNum + 1).padStart(2, '0')}-01`;
 
-  const { data: recentEntries } = await supabase
-    .from('journal_entries')
-    .select('id, content, entry_date, template_type')
-    .order('entry_date', { ascending: false })
-    .limit(5);
+    const { data: te } = await supabase
+      .from('journal_entries')
+      .select('id, content, template_type')
+      .eq('entry_date', today)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    todayEntry = te;
+
+    const { data: monthEntries } = await supabase
+      .from('journal_entries')
+      .select('entry_date')
+      .gte('entry_date', monthStart)
+      .lt('entry_date', nextMonth);
+
+    monthlyCount = monthEntries?.length ?? 0;
+    entryDates = monthEntries?.map(e => e.entry_date) ?? [];
+
+    const { data: re } = await supabase
+      .from('journal_entries')
+      .select('id, content, entry_date, template_type')
+      .order('entry_date', { ascending: false })
+      .limit(5);
+    recentEntries = re;
+  }
 
   return (
     <>

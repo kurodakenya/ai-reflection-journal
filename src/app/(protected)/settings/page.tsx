@@ -1,21 +1,37 @@
+import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserPlan } from '@/lib/subscription';
 import { SettingsForm } from './SettingsForm';
 import { ReminderSettings } from '@/components/settings/ReminderSettings';
 import { ExportData } from '@/components/settings/ExportData';
 import { DeleteAccount } from '@/components/settings/DeleteAccount';
+import { DEMO_MODE, DEMO_USER, DEMO_PROFILE } from '@/lib/demo';
+
+export const instant = false;
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  await connection();
+  let user: { email?: string; app_metadata?: Record<string, unknown> };
+  let plan: string;
+  let profile: { display_name: string; avatar_url: string | null; timezone: string } | null;
 
-  const plan = await getUserPlan();
+  if (DEMO_MODE) {
+    user = DEMO_USER;
+    plan = 'pro';
+    profile = DEMO_PROFILE;
+  } else {
+    const supabase = await createClient();
+    const { data: { user: u } } = await supabase.auth.getUser();
+    user = u!;
+    plan = await getUserPlan();
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('display_name, avatar_url, timezone')
-    .eq('id', user!.id)
-    .single();
+    const { data: p } = await supabase
+      .from('profiles')
+      .select('display_name, avatar_url, timezone')
+      .eq('id', u!.id)
+      .single();
+    profile = p;
+  }
 
   return (
     <>
@@ -29,7 +45,7 @@ export default async function SettingsPage() {
             プロフィール
           </h2>
           <SettingsForm
-            email={user!.email ?? ''}
+            email={user.email ?? ''}
             displayName={profile?.display_name ?? ''}
             timezone={profile?.timezone ?? 'Asia/Tokyo'}
           />
@@ -52,7 +68,7 @@ export default async function SettingsPage() {
                 メールアドレス
               </dt>
               <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                {user!.email}
+                {user.email}
               </dd>
             </div>
             <div>
@@ -60,7 +76,7 @@ export default async function SettingsPage() {
                 認証方法
               </dt>
               <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                {user!.app_metadata?.provider === 'github' ? 'GitHub' : 'メール+パスワード'}
+                {user.app_metadata?.provider === 'github' ? 'GitHub' : 'メール+パスワード'}
               </dd>
             </div>
             <div>

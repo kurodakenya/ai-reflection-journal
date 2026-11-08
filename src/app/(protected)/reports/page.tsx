@@ -1,7 +1,11 @@
+import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserPlan } from '@/lib/subscription';
 import Link from 'next/link';
 import { GenerateReportButton } from './GenerateReportButton';
+import { DEMO_MODE, getDemoReport } from '@/lib/demo';
+
+export const instant = false;
 
 type EmotionSummary = {
   dominant_emotion: string;
@@ -31,26 +35,39 @@ const EMOTION_LABELS: Record<string, string> = {
 };
 
 export default async function ReportsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const plan = await getUserPlan();
-
-  const { data: reports } = await supabase
-    .from('monthly_reports')
-    .select('*')
-    .eq('user_id', user!.id)
-    .order('year_month', { ascending: false });
+  await connection();
+  let plan: string;
+  let reports: Report[] | null;
+  let prevYearMonth: string;
+  let hasCurrentReport: boolean;
 
   const now = new Date();
   const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const prevYearMonth = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;
+  prevYearMonth = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;
 
-  const hasCurrentReport = reports?.some(
-    (r: Report) => r.year_month === prevYearMonth,
-  );
+  if (DEMO_MODE) {
+    plan = 'pro';
+    reports = [getDemoReport() as Report];
+    hasCurrentReport = true;
+  } else {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    plan = await getUserPlan();
+
+    const { data: r } = await supabase
+      .from('monthly_reports')
+      .select('*')
+      .eq('user_id', user!.id)
+      .order('year_month', { ascending: false });
+    reports = r as Report[] | null;
+
+    hasCurrentReport = reports?.some(
+      (r: Report) => r.year_month === prevYearMonth,
+    ) ?? false;
+  }
 
   return (
     <>

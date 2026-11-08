@@ -1,9 +1,13 @@
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { DeleteButton } from './DeleteButton';
 import { EmotionRadarChart } from '@/components/emotion/EmotionRadarChart';
 import { AnalyzeButton } from '@/components/emotion/AnalyzeButton';
+import { DEMO_MODE, getDemoEntry, getDemoEmotionAnalysis } from '@/lib/demo';
+
+export const instant = false;
 
 const TEMPLATE_LABELS: Record<string, string> = {
   free: '自由記述',
@@ -17,24 +21,32 @@ export default async function EntryDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await connection();
   const { id } = await params;
-  const supabase = await createClient();
 
-  const { data: entry } = await supabase
-    .from('journal_entries')
-    .select('*')
-    .eq('id', id)
-    .single();
+  let entry: Record<string, unknown> | null;
+  let emotionAnalysis: Record<string, unknown> | null;
 
-  if (!entry) {
-    notFound();
+  if (DEMO_MODE) {
+    entry = getDemoEntry(id);
+    emotionAnalysis = id === 'demo-1' ? getDemoEmotionAnalysis() : null;
+  } else {
+    const supabase = await createClient();
+
+    const { data: e } = await supabase
+      .from('journal_entries')
+      .select('*')
+      .eq('id', id)
+      .single();
+    entry = e;
+
+    const { data: ea } = await supabase
+      .from('emotion_analyses')
+      .select('*')
+      .eq('entry_id', id)
+      .maybeSingle();
+    emotionAnalysis = ea;
   }
-
-  const { data: emotionAnalysis } = await supabase
-    .from('emotion_analyses')
-    .select('*')
-    .eq('entry_id', id)
-    .maybeSingle();
 
   return (
     <>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { DEMO_MODE, getDemoCalendarEntries } from '@/lib/demo';
 
 type EntryInfo = {
   id: string;
@@ -33,6 +34,13 @@ export default function CalendarPage() {
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
+
+    if (DEMO_MODE) {
+      setEntries(getDemoCalendarEntries(year, month + 1));
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient();
     const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
     const endDate =

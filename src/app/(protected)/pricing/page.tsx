@@ -1,20 +1,29 @@
+import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { PLANS } from '@/lib/stripe';
 import { getUserPlan } from '@/lib/subscription';
 import { UpgradeButton } from '@/components/pricing/UpgradeButton';
 import { ManageButton } from '@/components/pricing/ManageButton';
+import { DEMO_MODE } from '@/lib/demo';
 
 export const instant = false;
 
 export default async function PricingPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  await connection();
+  let currentPlan: string;
 
-  if (!user) return null;
+  if (DEMO_MODE) {
+    currentPlan = 'pro';
+  } else {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  const currentPlan = await getUserPlan();
+    if (!user) return null;
+
+    currentPlan = await getUserPlan();
+  }
 
   const plans = [
     {

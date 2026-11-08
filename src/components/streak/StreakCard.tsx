@@ -1,20 +1,34 @@
+import { connection } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { DEMO_MODE, getDemoStreak } from '@/lib/demo';
 
 export async function StreakCard() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  await connection();
+  let currentStreak: number;
+  let longestStreak: number;
+  let lastEntryDate: string | undefined;
 
-  if (!user) return null;
+  if (DEMO_MODE) {
+    const streak = getDemoStreak();
+    currentStreak = streak.current_streak;
+    longestStreak = streak.longest_streak;
+    lastEntryDate = streak.last_entry_date;
+  } else {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: streak } = await supabase
-    .from('streaks')
-    .select('current_streak, longest_streak, last_entry_date')
-    .eq('user_id', user.id)
-    .single();
+    if (!user) return null;
 
-  const currentStreak = streak?.current_streak ?? 0;
-  const longestStreak = streak?.longest_streak ?? 0;
-  const lastEntryDate = streak?.last_entry_date;
+    const { data: streak } = await supabase
+      .from('streaks')
+      .select('current_streak, longest_streak, last_entry_date')
+      .eq('user_id', user.id)
+      .single();
+
+    currentStreak = streak?.current_streak ?? 0;
+    longestStreak = streak?.longest_streak ?? 0;
+    lastEntryDate = streak?.last_entry_date;
+  }
 
   const today = new Date().toISOString().split('T')[0];
   const wroteToday = lastEntryDate === today;
