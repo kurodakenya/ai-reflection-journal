@@ -17,7 +17,7 @@ const EMOTION_LABELS: Record<string, string> = {
   joy: '喜び',
   sadness: '悲しみ',
   anger: '怒り',
-  surprise: '驚き',
+  surprise: '不安',
   calm: '穏やか',
 };
 

@@ -283,23 +283,23 @@ export function getDemoAnalytics() {
     { emotion: '喜び', score: 68 },
     { emotion: '悲しみ', score: 15 },
     { emotion: '怒り', score: 8 },
-    { emotion: '驚き', score: 32 },
+    { emotion: '不安', score: 78 },
     { emotion: '穏やか', score: 72 },
   ];
 
   const emotionTrend = [
-    { date: fmt(daysAgo(25)).slice(5), joy: 55, sadness: 20, anger: 10, surprise: 25, calm: 60 },
-    { date: fmt(daysAgo(21)).slice(5), joy: 60, sadness: 12, anger: 5, surprise: 30, calm: 75 },
-    { date: fmt(daysAgo(18)).slice(5), joy: 65, sadness: 18, anger: 8, surprise: 28, calm: 68 },
-    { date: fmt(daysAgo(14)).slice(5), joy: 50, sadness: 25, anger: 15, surprise: 20, calm: 55 },
-    { date: fmt(daysAgo(12)).slice(5), joy: 70, sadness: 10, anger: 5, surprise: 35, calm: 78 },
-    { date: fmt(daysAgo(10)).slice(5), joy: 62, sadness: 15, anger: 8, surprise: 22, calm: 70 },
-    { date: fmt(daysAgo(7)).slice(5), joy: 75, sadness: 8, anger: 3, surprise: 40, calm: 80 },
-    { date: fmt(daysAgo(5)).slice(5), joy: 68, sadness: 12, anger: 6, surprise: 35, calm: 72 },
-    { date: fmt(daysAgo(3)).slice(5), joy: 58, sadness: 15, anger: 10, surprise: 30, calm: 65 },
-    { date: fmt(daysAgo(2)).slice(5), joy: 72, sadness: 8, anger: 4, surprise: 28, calm: 76 },
-    { date: fmt(daysAgo(1)).slice(5), joy: 65, sadness: 14, anger: 7, surprise: 32, calm: 70 },
-    { date: fmt(today).slice(5), joy: 72, sadness: 8, anger: 3, surprise: 35, calm: 80 },
+    { date: fmt(daysAgo(25)).slice(5), joy: 55, sadness: 20, anger: 10, surprise: 70, calm: 60 },
+    { date: fmt(daysAgo(21)).slice(5), joy: 60, sadness: 12, anger: 5, surprise: 75, calm: 65 },
+    { date: fmt(daysAgo(18)).slice(5), joy: 65, sadness: 18, anger: 8, surprise: 72, calm: 68 },
+    { date: fmt(daysAgo(14)).slice(5), joy: 50, sadness: 25, anger: 15, surprise: 68, calm: 55 },
+    { date: fmt(daysAgo(12)).slice(5), joy: 70, sadness: 10, anger: 5, surprise: 80, calm: 65 },
+    { date: fmt(daysAgo(10)).slice(5), joy: 62, sadness: 15, anger: 8, surprise: 74, calm: 60 },
+    { date: fmt(daysAgo(7)).slice(5), joy: 65, sadness: 8, anger: 3, surprise: 82, calm: 64 },
+    { date: fmt(daysAgo(5)).slice(5), joy: 68, sadness: 12, anger: 6, surprise: 78, calm: 62 },
+    { date: fmt(daysAgo(3)).slice(5), joy: 58, sadness: 15, anger: 10, surprise: 76, calm: 55 },
+    { date: fmt(daysAgo(2)).slice(5), joy: 62, sadness: 8, anger: 4, surprise: 80, calm: 60 },
+    { date: fmt(daysAgo(1)).slice(5), joy: 65, sadness: 14, anger: 7, surprise: 78, calm: 62 },
+    { date: fmt(today).slice(5), joy: 60, sadness: 8, anger: 3, surprise: 82, calm: 65 },
   ];
 
   return {
