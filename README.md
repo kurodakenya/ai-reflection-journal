@@ -14,6 +14,7 @@
 | データエクスポート | JSON / CSV形式でダウンロード（Pro） |
 | 収益化 | Stripe決済によるFree/Proプラン |
 | アカウント削除 | 全データ完全削除（CASCADE） |
+| データ暗号化 | 日記本文・表示名・AIフィードバックをAES-256-GCMで暗号化 |
 
 ## 技術スタック
 
@@ -55,6 +56,7 @@ src/
     ├── supabase/                 # Supabaseクライアント（client/server）
     ├── stripe.ts                 # Stripe設定・プラン定義
     ├── claude.ts                 # Claude API連携
+    ├── encryption.ts             # AES-256-GCM暗号化/復号
     └── subscription.ts           # Free/Pro判定・利用制限
 ```
 
@@ -92,6 +94,15 @@ STRIPE_WEBHOOK_SECRET=your_webhook_secret
 NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=your_pro_price_id
 
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# 個人情報暗号化（AES-256-GCM）
+ENCRYPTION_KEY=your_64char_hex_key
+```
+
+`ENCRYPTION_KEY` は以下のコマンドで生成できます:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### DBマイグレーション
