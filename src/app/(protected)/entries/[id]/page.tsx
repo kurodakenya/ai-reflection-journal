@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';

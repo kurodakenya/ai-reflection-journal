@@ -38,12 +38,11 @@ export default async function ReportsPage() {
   await connection();
   let plan: string;
   let reports: Report[] | null;
-  let prevYearMonth: string;
   let hasCurrentReport: boolean;
 
   const now = new Date();
   const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  prevYearMonth = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;
+  const prevYearMonth = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, '0')}`;
 
   if (DEMO_MODE) {
     plan = 'pro';

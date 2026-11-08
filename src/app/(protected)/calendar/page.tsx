@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { DEMO_MODE, getDemoCalendarEntries } from '@/lib/demo';
@@ -32,13 +32,17 @@ export default function CalendarPage() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const fetchEntries = useCallback(async () => {
-    setLoading(true);
+  useEffect(() => {
+    let cancelled = false;
 
     if (DEMO_MODE) {
-      setEntries(getDemoCalendarEntries(year, month + 1));
-      setLoading(false);
-      return;
+      Promise.resolve().then(() => {
+        if (!cancelled) {
+          setEntries(getDemoCalendarEntries(year, month + 1));
+          setLoading(false);
+        }
+      });
+      return () => { cancelled = true; };
     }
 
     const supabase = createClient();
@@ -48,26 +52,31 @@ export default function CalendarPage() {
         ? `${year + 1}-01-01`
         : `${year}-${String(month + 2).padStart(2, '0')}-01`;
 
-    const { data } = await supabase
+    supabase
       .from('journal_entries')
       .select('id, entry_date, template_type')
       .gte('entry_date', startDate)
       .lt('entry_date', endDate)
-      .order('entry_date');
+      .order('entry_date')
+      .then(({ data }) => {
+        if (!cancelled) {
+          setEntries(data ?? []);
+          setLoading(false);
+        }
+      });
 
-    setEntries(data ?? []);
-    setLoading(false);
+    return () => { cancelled = true; };
   }, [year, month]);
 
-  useEffect(() => {
-    fetchEntries();
-  }, [fetchEntries]);
-
   function prevMonth() {
+    setLoading(true);
+    setEntries([]);
     setCurrentDate(new Date(year, month - 1, 1));
   }
 
   function nextMonth() {
+    setLoading(true);
+    setEntries([]);
     setCurrentDate(new Date(year, month + 1, 1));
   }
 
