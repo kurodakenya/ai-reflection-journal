@@ -75,7 +75,7 @@ ws1.sheet_properties.tabColor = "2F5496"
 
 ws1.cell(row=1, column=1, value="AI振り返りジャーナル — 開発ロードマップ").font = TITLE_FONT
 ws1.merge_cells("A1:L1")
-ws1.cell(row=2, column=1, value="作成日: 2026-11-06　ステータス: Phase 5 完了").font = Font(name="Meiryo UI", size=9, color="666666")
+ws1.cell(row=2, column=1, value="作成日: 2026-11-06　ステータス: Phase 6 完了（デプロイ除く）").font = Font(name="Meiryo UI", size=9, color="666666")
 
 headers = [
     "Phase", "No.", "タスク名", "カテゴリ", "説明",
@@ -222,26 +222,26 @@ tasks = [
 
     # Phase 6: 公開準備
     ("Phase 6", 38, "ランディングページ", "UI",
-     "ヒーロー・機能紹介・料金比較・フッター（SSG配信）",
-     "高", "未着手", "", 8, "", "", ""),
+     "ヒーロー・機能紹介・料金比較・FAQ・フッター（SSG配信）",
+     "高", "完了", "", 8, "", "", ""),
     ("Phase 6", 39, "SEO / OGP 設定", "公開準備",
      "メタタグ・OGP画像・sitemap.xml・robots.txt",
-     "中", "未着手", "", 3, "", "", ""),
+     "中", "完了", "", 3, "", "", ""),
     ("Phase 6", 40, "テスト作成・実行", "品質",
-     "Jest + React Testing Library — 主要フローのユニット/統合テスト",
-     "高", "未着手", "", 12, "", "", ""),
+     "Vitest + React Testing Library — LP・subscription・export のユニットテスト",
+     "高", "完了", "", 12, "", "", "16テスト通過"),
     ("Phase 6", 41, "CI/CD パイプライン", "公開準備",
-     "GitHub Actions — lint + test + 自動デプロイ",
-     "高", "未着手", "", 4, "", "", ""),
+     "GitHub Actions — lint + format:check + test + build",
+     "高", "完了", "", 4, "", "", ""),
     ("Phase 6", 42, "README.md 作成", "公開準備",
-     "スクショ付き・セットアップ手順・アーキテクチャ図",
-     "中", "未着手", "", 4, "", "", ""),
+     "機能一覧・技術スタック・アーキテクチャ・セットアップ手順・プラン比較",
+     "中", "完了", "", 4, "", "", ""),
     ("Phase 6", 43, "Vercel デプロイ", "公開準備",
      "本番デプロイ・環境変数設定・カスタムドメイン",
      "高", "未着手", "", 3, "", "", ""),
     ("Phase 6", 44, "GitHub リポジトリ公開", "公開準備",
-     "リポジトリ公開設定・ライセンス・トピック・Description設定",
-     "高", "未着手", "", 1, "", "", "最終ステップ"),
+     "ライセンス (MIT)・Description・トピック設定",
+     "高", "完了", "", 1, "", "", "gh CLI未導入のためdescription/topics手動設定"),
 ]
 
 r = 5
@@ -371,11 +371,11 @@ milestones = [
     (9, "高度機能完成", "Phase 5",
      "月間レポート・リマインダー・エクスポート・アカウント削除", "完了", "", ""),
     (10, "LP・公開準備完了", "Phase 6",
-     "ランディングページ・SEO/OGP・README完成", "未着手", "", ""),
+     "ランディングページ・SEO/OGP・README完成", "完了", "", ""),
     (11, "テスト・CI/CD完了", "Phase 6",
-     "主要フローのテスト通過・GitHub Actions動作確認", "未着手", "", ""),
+     "主要フローのテスト通過・GitHub Actions動作確認", "完了", "", ""),
     (12, "本番デプロイ・GitHub公開", "Phase 6",
-     "Vercelデプロイ完了・GitHubリポジトリ公開", "未着手", "", "最終マイルストーン"),
+     "Vercelデプロイ完了・GitHubリポジトリ公開", "未着手", "", "デプロイ待ち"),
 ]
 
 r = 4
@@ -405,6 +405,7 @@ write_row(ws3, 6, ("2026-11-07", "Phase 2 全完了（No.18〜21）カレンダ�
 write_row(ws3, 7, ("2026-11-07", "Phase 3 No.22〜24 完了（Claude API連携・感情分析・レーダーチャート）、No.25-26 保留", "", "AI感情分析実装"), center_cols={1, 3})
 write_row(ws3, 8, ("2026-11-07", "Phase 4 全完了（No.27〜32）Stripe決済・Webhook・請求ポータル・制限ロジック・料金プランページ", "", "収益化機能実装"), center_cols={1, 3})
 write_row(ws3, 9, ("2026-11-08", "Phase 5 全完了（No.33〜37）月間レポート生成・レポート画面・リマインダー通知・データエクスポート・アカウント削除", "", "高度な機能実装"), center_cols={1, 3})
+write_row(ws3, 10, ("2026-11-08", "Phase 6 完了（No.38〜42,44）LP・SEO/OGP・Vitest・CI/CD・README・LICENSE（No.43 Vercelデプロイ除く）", "", "公開準備"), center_cols={1, 3})
 
 
 # ==============================
