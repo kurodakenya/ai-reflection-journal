@@ -34,12 +34,16 @@ CI/CD:     GitHub Actions
 src/
 ├── app/
 │   ├── page.tsx                  # ランディングページ
-│   ├── auth/                     # 認証（ログイン/登録）
+│   ├── sitemap.ts                # サイトマップ生成
+│   ├── robots.ts                 # robots.txt生成
+│   ├── auth/                     # 認証（ログイン/登録/パスワードリセット）
 │   ├── (protected)/              # 認証必須ルート
 │   │   ├── dashboard/            # ダッシュボード
-│   │   ├── journal/              # 日記 CRUD
+│   │   ├── entries/              # 日記 CRUD（一覧・詳細・作成・編集）
 │   │   ├── calendar/             # カレンダービュー
+│   │   ├── analytics/            # 感情分析チャート
 │   │   ├── reports/              # 月間レポート
+│   │   ├── pricing/              # 料金プラン
 │   │   └── settings/             # プロフィール・リマインダー・エクスポート・削除
 │   └── api/
 │       ├── analyze/              # AI感情分析
@@ -50,14 +54,18 @@ src/
 │       └── stripe/               # Checkout・Webhook・Portal
 ├── components/
 │   ├── layout/                   # Header・Sidebar・MobileNav
-│   ├── journal/                  # 日記エディタ・カード
+│   ├── emotion/                  # 感情分析ボタン・レーダーチャート
+│   ├── pricing/                  # アップグレード・管理ボタン
+│   ├── streak/                   # ストリークカード
+│   ├── dashboard/                # ミニカレンダー
 │   └── settings/                 # リマインダー・エクスポート・削除
 └── lib/
     ├── supabase/                 # Supabaseクライアント（client/server）
     ├── stripe.ts                 # Stripe設定・プラン定義
     ├── claude.ts                 # Claude API連携
     ├── encryption.ts             # AES-256-GCM暗号化/復号
-    └── subscription.ts           # Free/Pro判定・利用制限
+    ├── subscription.ts           # Free/Pro判定・利用制限
+    └── demo.ts                   # デモデータ生成
 ```
 
 ## セットアップ
@@ -109,10 +117,10 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 `supabase/migrations/` 内のSQLファイルをSupabaseダッシュボードのSQL Editorで順番に実行:
 
-1. `001_create_tables.sql` — テーブル・RLS作成
-2. `002_create_triggers.sql` — トリガー関数
-3. `003_add_stripe_fields.sql` — Stripe関連カラム
-4. `004_add_reminder_settings.sql` — リマインダー設定カラム
+1. `001_create_tables.sql` — テーブル作成（profiles, journal_entries, emotion_analyses, streaks, subscriptions, monthly_reports）
+2. `002_create_functions_triggers.sql` — トリガー関数（ユーザー作成時の自動レコード生成等）
+3. `003_create_rls_policies.sql` — RLS（Row Level Security）ポリシー設定
+4. `004_add_reminder_settings.sql` — リマインダー設定カラム追加
 
 ### 開発サーバー起動
 

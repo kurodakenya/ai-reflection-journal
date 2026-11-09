@@ -39,7 +39,7 @@
 
 | レイヤー | 技術 | 選定理由 |
 |---|---|---|
-| フロントエンド | Next.js 14+ (App Router) / TypeScript | SSR/SSG対応、App Routerでの最新設計 |
+| フロントエンド | Next.js 16 (App Router) / TypeScript | SSR/SSG対応、App Routerでの最新設計 |
 | スタイリング | Tailwind CSS | ユーティリティファースト、高速UI構築 |
 | バックエンド/DB | Supabase (PostgreSQL) | Auth・DB・RLS・Realtimeを一括提供 |
 | 認証 | Supabase Auth | OAuth (Google/GitHub) + メール認証 |
